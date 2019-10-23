@@ -17,7 +17,7 @@ namespace verilogmoduleio
             bool areacomment = false;
             string removedcode = string.Empty;
 
-            var reg = new Regex(@"\*[\s\S]*?\*/|//.*");
+            var reg = new Regex(@"\/*[\s\S]*?\*/|//.*");
 
             removedcode = reg.Replace(verilogcode, " ");
 
