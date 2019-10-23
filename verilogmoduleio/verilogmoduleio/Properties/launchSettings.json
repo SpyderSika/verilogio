@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "verilogmoduleio": {
+      "commandName": "Project",
+      "commandLineArgs": "testverilog.v"
+    }
+  }
+}
