@@ -25,48 +25,17 @@ namespace verilogmoduleio
 
 
         }
-/*
-        private (string, bool, bool) linecommentRemove(string linecode, bool currentlinecomment, bool currentareacomment)
+
+        public string[] moduleSplit(string verilogcode)
         {
-            bool linecomment = false;
-            bool areacomment = false;
-            string removedcode = linecode;
 
-            // find '//'
-            var linecommentposition = removedcode.IndexOf(linecommentword);
-            var startareacommentposition = removedcode.IndexOf(startareacommentword);
-            var endareacommentposition = removedcode.IndexOf(endareacommentword);
+            var reg = new Regex(@"endmodule");
+            var modules = reg.Split(verilogcode);
 
-            if ( currentareacomment == true)
-            {
-                if (endareacommentposition >= 0)
-                {
-
-                }
-                else
-                {
-
-                }
-            }
-            else
-            {
-
-
-
-            }
-
-
-
-
+            return modules;
 
         }
-        */
 
-        // /*da
-        /* //afdsa
-         */
-
-        
 
 
     }

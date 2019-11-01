@@ -19,6 +19,18 @@ namespace verilogmoduleio
 
                 Console.WriteLine(result);
 
+                Console.WriteLine("-----------------");
+
+                var modules = vp.moduleSplit(result);
+
+                foreach(var s in modules)
+                {
+                    Console.WriteLine("===========");
+                    Console.WriteLine(s);
+                    Console.WriteLine("===========");
+                }
+
+
             }
 
         }
