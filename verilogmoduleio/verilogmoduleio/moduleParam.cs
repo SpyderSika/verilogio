@@ -17,7 +17,7 @@ namespace verilogmoduleio.moduleParamData
 
         public string definedFilePath;
 
-        moduleParam()
+        public moduleParam()
         {
             moduleName = string.Empty;
             instanceName = string.Empty;
@@ -40,7 +40,7 @@ namespace verilogmoduleio.moduleParamData
 
         public Dictionary<string, signalParam> wireDic;
 
-        instanceParam()
+        public instanceParam()
         {
             moduleName = string.Empty;
             instanceName = string.Empty;
@@ -56,11 +56,12 @@ namespace verilogmoduleio.moduleParamData
     /// wire property enum
     /// inputPort : verilog input
     /// outputPort: verilog output
+    /// inoutPort: verilog inout
     /// internalSingal: verilog  internal wire
     /// </summary>
     public enum signalIOProperty
     {
-        inputPort,outputPort,internalSignal,unKnown
+        inputPort,outputPort,inoutPort, internalSignal,unKnown
     }
 
     /// <summary>
@@ -79,15 +80,16 @@ namespace verilogmoduleio.moduleParamData
     {
         public string signalName;
         public string signalWidth;
+        public List<string> signalProperty; // input, output, inout, reg,wire
         
         public signalIOProperty signalIO;
         public signalTypeProperty signalType;
 
-        signalParam()
+        public signalParam()
         {
             signalName = string.Empty;
             signalWidth = string.Empty;
-
+            signalProperty = new List<string>();
             signalIO = signalIOProperty.unKnown;
             signalType = signalTypeProperty.wire;
         }

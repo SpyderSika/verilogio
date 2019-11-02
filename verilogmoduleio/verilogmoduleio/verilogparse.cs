@@ -12,7 +12,11 @@ namespace verilogmoduleio
         public readonly string linecommentword = "//";
         public readonly string startareacommentword = "/*";
         public readonly string endareacommentword = "*/";
-        
+        public readonly string inputPortword = "input";
+        public readonly string outputPortword = "output";
+
+
+
         /// <summary>
         /// remove comment from verilog code.
         /// </summary>
@@ -51,14 +55,55 @@ namespace verilogmoduleio
 
 
         // this function should be private and be called by public investigate all module description.
-        public Dictionary<string, signalParam> extractWireDefinition(string  modulecode)
+        public Dictionary<string, signalParam> extractSignalDefinition(string  verilogcode, string extractKeyword)
         {
             Dictionary<string, signalParam> foundsignals = new Dictionary<string, signalParam>();
 
+            // split line. verilog uses ';' to separate each line.
+            var reg = new Regex(@";");
+            var lines = reg.Split(verilogcode);
+
+            foreach(var line in lines)
+            {
+                var startPointofword = line.IndexOf(extractKeyword);
+
+                if (startPointofword >= 0 )
+                {
+
+                    // extract width
+                    var widthMatch = Regex.Match(line, @"\[[\s\S]*?\]");
+                    var width = widthMatch.Value;
+
+                    // extract signalname
+                    var shiftedline = line.Substring(startPointofword);
+                    
+                    var temp = shiftedline.Trim().Replace(extractKeyword, "");
+                    temp = temp.Replace(";", "");
+                    if ( width != string.Empty && width != null)
+                        temp = temp.Replace(width, "");
+
+                    var namesinline = temp.Split(",");
+
+                    foreach( var name in namesinline)
+                    {
+                        signalParam currentParam = new signalParam();
+
+                        currentParam.signalName = name.Trim();
+                        currentParam.signalWidth = width;
+                        currentParam.signalProperty.Add(extractKeyword);
+
+                        foundsignals.Add(name,currentParam);
+                    }
+
+
+                }
+            }
 
 
             return foundsignals;
         }
+
+
 
 
 
