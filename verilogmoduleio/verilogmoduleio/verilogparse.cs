@@ -99,12 +99,13 @@ namespace verilogmoduleio
         public string  extractmoduleDefinition(string verilogcode)
         {
             var moduleStartPoint = verilogcode.IndexOf(moduleword);
-            var endofmoduleDefinitionPoint = verilogcode.IndexOf('(') - 1;
+            var endofmoduleDefinitionPoint = verilogcode.IndexOf('(');
             string modulename = string.Empty;
+
             if ( endofmoduleDefinitionPoint >= 0)
             {
                 var startofmoduleDefinitionPoint = moduleStartPoint + moduleword.Length;
-                modulename = verilogcode.Substring(startofmoduleDefinitionPoint, endofmoduleDefinitionPoint);
+                modulename = verilogcode.Substring(startofmoduleDefinitionPoint, endofmoduleDefinitionPoint - startofmoduleDefinitionPoint);
                 modulename = modulename.Trim();
             }
 
@@ -132,10 +133,24 @@ namespace verilogmoduleio
                     var widthMatch = Regex.Match(line, @"\[[\s\S]*?\]");
                     var width = widthMatch.Value;
 
+                    // extract reg/wire definition and remove word from line
+                    var wirePoint = line.IndexOf(wireword);
+                    var regPoint = line.IndexOf(regword);
+                    signalTypeProperty type = signalTypeProperty.wire;
+
+                    if ( regPoint >= 0)
+                    {
+                        type = signalTypeProperty.reg;
+                    }
+                    var regwireRemovedline = line.Replace(wireword, "");
+                    regwireRemovedline = regwireRemovedline.Replace(regword, "");
+
+
+
                     // extract signalname
-                    var shiftedline = line.Substring(startPointofword);
-                    
+                    var shiftedline = regwireRemovedline.Substring(startPointofword);
                     var temp = shiftedline.Trim().Replace(extractKeyword, "");
+
                     temp = temp.Replace(";", "");
                     if ( width != string.Empty && width != null)
                         temp = temp.Replace(width, "");
@@ -149,6 +164,8 @@ namespace verilogmoduleio
                         currentParam.signalName = name.Trim();
                         currentParam.signalWidth = width;
                         currentParam.signalProperty.Add(extractKeyword);
+                        currentParam.signalType = type;
+                        currentParam.signalIO = judgeIOfromword(extractKeyword);
 
                         foundsignals.Add(name,currentParam);
                     }
@@ -162,7 +179,30 @@ namespace verilogmoduleio
         }
 
 
+        private signalIOProperty judgeIOfromword(string keyword)
+        {
+            signalIOProperty iotype = new signalIOProperty();
 
+            if ( keyword == inputPortword)
+            {
+                iotype = signalIOProperty.inputPort;
+            }
+            else if ( keyword == outputPortword)
+            {
+                iotype = signalIOProperty.outputPort;
+            }
+            else if ( keyword == inoutPortword)
+            {
+                iotype = signalIOProperty.inoutPort;
+            }
+            else
+            {
+                iotype = signalIOProperty.unKnown;
+            }
+
+            return iotype;
+
+        }
 
 
     }

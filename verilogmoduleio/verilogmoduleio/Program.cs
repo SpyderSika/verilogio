@@ -31,12 +31,14 @@ namespace verilogmoduleio
                 Console.WriteLine("-----------------");
 
                 // extract signal test
+                /*
                 var signals = vp.extractSignalDefinition(modules[0], "input");
                 foreach(var  s in signals)
                 {
                     Console.WriteLine(String.Format("{0},{1},{2}", s.Value.signalName, s.Value.signalWidth, s.Value.signalProperty[0]));
                 }
                 Console.WriteLine("-----------------");
+                */
 
                 // extract module test
                 foreach( var m in modules)
@@ -48,7 +50,7 @@ namespace verilogmoduleio
 
                     foreach( var s in mdata.signalDic)
                     {
-                        Console.WriteLine(String.Format("{0},{1},{2},{3}",s.Value.signalName,s.Value.signalIO,s.Value.signalWidth,s.Value.signalType));
+                        Console.WriteLine(String.Format("{0},{1},{2},{3}",s.Value.signalName,s.Value.signalIO.ToString(),s.Value.signalWidth,s.Value.signalType.ToString()));
                     }
 
                 }
