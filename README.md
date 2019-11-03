@@ -1,7 +1,7 @@
 # verilogio
 
-generate comment from verilog module input/output/inout
-note: at this moment, not tested and just implemented as class, not executable.
+## summary
+generate text diagram comment from verilog module declaration.<p>
 
 if read verilog code,
 ```C
@@ -29,3 +29,37 @@ result is
 //         #              #->add
 //         ################
 ```
+
+## How to use
+It's console app. execute app and supply option and verilog source as following:
+
+Windwos:
+verilogio.exe -d targetmodule.v
+
+Linux:(not tested)
+verilogio -d targetmodule.v
+
+verilogio.exe shows result at console.
+
+test is the name of module.
+each input signals are shown at left side.
+output or inout signals are shown at right side.
+'->' means arrow and signal direction.
+if the signal is the bus, '=>' is used for arrow.
+
+```c
+//test
+//         ################
+//clk    ->#              #
+//reset_b->#              #
+//a      ->#              #
+//b[3:0] =>#              #
+//         #              #->add
+//         ################
+```
+
+## License
+This library is provided under MIT License.
+
+## Author
+I don't open my real name, so SpyderSika is the name at github.
