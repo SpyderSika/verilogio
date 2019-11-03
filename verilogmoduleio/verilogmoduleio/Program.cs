@@ -53,6 +53,11 @@ namespace verilogmoduleio
                         Console.WriteLine(String.Format("{0},{1},{2},{3}",s.Value.signalName,s.Value.signalIO.ToString(),s.Value.signalWidth,s.Value.signalType.ToString()));
                     }
 
+                    var diagram = vp.drawmoduleIO(mdata);
+
+                    Console.WriteLine(diagram);
+
+
                 }
 
 

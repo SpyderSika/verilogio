@@ -22,6 +22,15 @@ namespace verilogmoduleio
         public readonly string moduleword = "module";
         public readonly string endmoduleword = "endmodule";
 
+        public readonly string left2rightarrow = "->";
+        public readonly string busleft2rightarrow = "=>";
+
+        public readonly string rigt2leftarrow = "<-";
+        public readonly string busrigt2leftarrow = "<=";
+
+        public readonly string bothdirectionarrow = "<->";
+        public readonly string bothbusdirectionarrow = "<=>";
+
         /// <summary>
         /// remove comment from verilog code.
         /// </summary>
@@ -202,6 +211,76 @@ namespace verilogmoduleio
 
             return iotype;
 
+        }
+
+        public string drawmoduleIO(moduleParam modP)
+        {
+            string result = string.Empty;
+
+            string moduletop = "################";
+            string modulebody = "#              #";
+
+            // module name
+            result += linecommentword + modP.moduleName + Environment.NewLine;
+
+            // max input port length
+            var maxlength = 0;
+            foreach( var sig in modP.signalDic)
+            {
+                var leftlength = sig.Value.signalName.Length + sig.Value.signalWidth.Length;
+                maxlength = (maxlength < leftlength) ? leftlength : maxlength;
+            }
+
+            // padding
+            var leftpadding = string.Empty;
+            for (int i = 0; i < maxlength + left2rightarrow.Length; i++)
+                leftpadding += " ";
+
+            result += linecommentword + leftpadding + moduletop + Environment.NewLine;
+
+            // loop twice is not smart.... 
+            foreach (var sig in modP.signalDic)
+            {
+                var temp = string.Empty;
+
+                if (sig.Value.signalIO == signalIOProperty.inputPort)
+                {
+                    var leftport = sig.Value.signalName + sig.Value.signalWidth;
+                    int loop = maxlength - leftport.Length;
+
+                    // padding
+                    if (leftport.Length < maxlength)
+                        for (int i = 0; i < loop; i++)
+                            leftport += " ";
+
+                    var arrow = (sig.Value.signalWidth == string.Empty) ? left2rightarrow : busleft2rightarrow;
+
+                    result += linecommentword + leftport + arrow + modulebody + Environment.NewLine;
+
+                }
+                else
+                {
+                    var rightport = sig.Value.signalName + sig.Value.signalWidth;
+
+
+
+                    var arrow = (sig.Value.signalWidth == string.Empty) ? rigt2leftarrow : busrigt2leftarrow;
+                    if (sig.Value.signalIO == signalIOProperty.inoutPort)
+                        arrow = (sig.Value.signalWidth == string.Empty) ? bothdirectionarrow : bothbusdirectionarrow;
+
+
+                    result += linecommentword + leftpadding + modulebody + arrow + rightport + Environment.NewLine;
+
+                }
+
+            }
+
+            result += linecommentword + leftpadding + moduletop + Environment.NewLine;
+
+
+
+
+            return result;
         }
 
 
