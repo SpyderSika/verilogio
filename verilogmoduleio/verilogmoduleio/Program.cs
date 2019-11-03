@@ -36,6 +36,23 @@ namespace verilogmoduleio
                 {
                     Console.WriteLine(String.Format("{0},{1},{2}", s.Value.signalName, s.Value.signalWidth, s.Value.signalProperty[0]));
                 }
+                Console.WriteLine("-----------------");
+
+                // extract module test
+                foreach( var m in modules)
+                {
+                    var mdata = vp.extractmodulePorts(m);
+
+                    Console.WriteLine(":::::::::::::::::::::::::");
+                    Console.WriteLine(mdata.moduleName);
+
+                    foreach( var s in mdata.signalDic)
+                    {
+                        Console.WriteLine(String.Format("{0},{1},{2},{3}",s.Value.signalName,s.Value.signalIO,s.Value.signalWidth,s.Value.signalType));
+                    }
+
+                }
+
 
 
 

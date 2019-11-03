@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Linq;
 using verilogmoduleio.moduleParamData;
 
 namespace verilogmoduleio
@@ -12,10 +13,14 @@ namespace verilogmoduleio
         public readonly string linecommentword = "//";
         public readonly string startareacommentword = "/*";
         public readonly string endareacommentword = "*/";
+
         public readonly string inputPortword = "input";
         public readonly string outputPortword = "output";
-
-
+        public readonly string inoutPortword = "inout";
+        public readonly string wireword = "wire";
+        public readonly string regword = "reg";
+        public readonly string moduleword = "module";
+        public readonly string endmoduleword = "endmodule";
 
         /// <summary>
         /// remove comment from verilog code.
@@ -46,11 +51,64 @@ namespace verilogmoduleio
         public string[] moduleSplit(string verilogcode)
         {
 
-            var reg = new Regex(@"endmodule");
+            var reg = new Regex(endmoduleword);
             var modules = reg.Split(verilogcode);
 
             return modules;
 
+        }
+
+
+        public moduleParam extractmodulePorts(string verilogcode)
+        {
+            moduleParam module = new moduleParam();
+            var modulename = extractmoduleDefinition(verilogcode);
+            Dictionary<string, signalParam> ports = new Dictionary<string, signalParam>();
+
+            if ( modulename != string.Empty || modulename != null )
+            {
+                module.moduleName = modulename;
+
+                // input port extract
+                var input =  this.extractSignalDefinition(verilogcode, inputPortword);
+                var output = this.extractSignalDefinition(verilogcode, outputPortword);
+                var inout = this.extractSignalDefinition(verilogcode, inoutPortword);
+
+                try
+                {
+                    module.signalDic = input.Concat(output).ToDictionary(v => v.Key, v => v.Value).Concat(inout).ToDictionary(v=>v.Key,v=>v.Value);
+                    
+
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("verilog code parsing error.");
+                }
+
+
+
+            }
+
+            return module;
+        }
+
+
+
+        // this function should be private and be called by public investigate all module description.
+        public string  extractmoduleDefinition(string verilogcode)
+        {
+            var moduleStartPoint = verilogcode.IndexOf(moduleword);
+            var endofmoduleDefinitionPoint = verilogcode.IndexOf('(') - 1;
+            string modulename = string.Empty;
+            if ( endofmoduleDefinitionPoint >= 0)
+            {
+                var startofmoduleDefinitionPoint = moduleStartPoint + moduleword.Length;
+                modulename = verilogcode.Substring(startofmoduleDefinitionPoint, endofmoduleDefinitionPoint);
+                modulename = modulename.Trim();
+            }
+
+            return modulename;
         }
 
 

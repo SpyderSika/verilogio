@@ -12,7 +12,7 @@ namespace verilogmoduleio.moduleParamData
         public string moduleName;
         public string instanceName;
 
-        public Dictionary<string, signalParam> wireDic;
+        public Dictionary<string, signalParam> signalDic;
         public Dictionary<string, instanceParam> instanceDic;
 
         public string definedFilePath;
@@ -21,7 +21,7 @@ namespace verilogmoduleio.moduleParamData
         {
             moduleName = string.Empty;
             instanceName = string.Empty;
-            wireDic = new Dictionary<string, signalParam>();
+            signalDic = new Dictionary<string, signalParam>();
             instanceDic = new Dictionary<string, instanceParam>();
 
             definedFilePath = string.Empty;
