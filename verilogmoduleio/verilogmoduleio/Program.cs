@@ -7,64 +7,48 @@ namespace verilogmoduleio
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("verilogio");
 
-            // read verilog file
-            using (StreamReader fr = new StreamReader(args[0]))
+            if (args.Length < 2)
             {
-                var code = fr.ReadToEnd();
-                verilogparse vp = new verilogparse();
-
-                // comment remove test
-                var result = vp.commentRemove(code);
-                Console.WriteLine(result);
-                Console.WriteLine("-----------------");
-
-                // module split test
-                var modules = vp.moduleSplit(result);
-                foreach(var s in modules)
-                {
-                    Console.WriteLine("===========");
-                    Console.WriteLine(s);
-                    Console.WriteLine("===========");
-                }
-                Console.WriteLine("-----------------");
-
-                // extract signal test
-                /*
-                var signals = vp.extractSignalDefinition(modules[0], "input");
-                foreach(var  s in signals)
-                {
-                    Console.WriteLine(String.Format("{0},{1},{2}", s.Value.signalName, s.Value.signalWidth, s.Value.signalProperty[0]));
-                }
-                Console.WriteLine("-----------------");
-                */
-
-                // extract module test
-                foreach( var m in modules)
-                {
-                    var mdata = vp.extractmodulePorts(m);
-
-                    Console.WriteLine(":::::::::::::::::::::::::");
-                    Console.WriteLine(mdata.moduleName);
-
-                    foreach( var s in mdata.signalDic)
-                    {
-                        Console.WriteLine(String.Format("{0},{1},{2},{3}",s.Value.signalName,s.Value.signalIO.ToString(),s.Value.signalWidth,s.Value.signalType.ToString()));
-                    }
-
-                    var diagram = vp.drawmoduleIO(mdata);
-
-                    Console.WriteLine(diagram);
-
-
-                }
-
-
-
+                Console.WriteLine("verilogio option target.v");
+                Console.WriteLine("option: -d  draw module IO diagram");
 
             }
 
+            var option = args[0].ToLower();
+
+            switch (option)
+            {
+                case "-d":
+                    drawDiagram(args);
+                    break;
+            }
+
+
+        }
+
+        private static void drawDiagram(string[] args)
+        {
+            // read verilog file
+            using (StreamReader fr = new StreamReader(args[1]))
+            {
+                var code = fr.ReadToEnd();
+
+                verilogparse vp = new verilogparse();
+                var commentRemoved = vp.commentRemove(code);
+
+                var modulecodearray = vp.moduleSplit(commentRemoved);
+
+                // extract module 
+                foreach (var m in modulecodearray)
+                {
+                    var mdata = vp.extractmodulePorts(m);
+                    var diagram = vp.drawmoduleIO(mdata);
+
+                    Console.WriteLine(diagram);
+                }
+            }
         }
     }
 }

@@ -2,7 +2,7 @@
   "profiles": {
     "verilogmoduleio": {
       "commandName": "Project",
-      "commandLineArgs": "testverilog.v"
+      "commandLineArgs": "-d testverilog.v"
     }
   }
 }
