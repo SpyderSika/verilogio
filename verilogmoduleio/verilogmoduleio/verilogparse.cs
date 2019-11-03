@@ -264,7 +264,7 @@ namespace verilogmoduleio
 
 
 
-                    var arrow = (sig.Value.signalWidth == string.Empty) ? rigt2leftarrow : busrigt2leftarrow;
+                    var arrow = (sig.Value.signalWidth == string.Empty) ? left2rightarrow : busleft2rightarrow;
                     if (sig.Value.signalIO == signalIOProperty.inoutPort)
                         arrow = (sig.Value.signalWidth == string.Empty) ? bothdirectionarrow : bothbusdirectionarrow;
 
