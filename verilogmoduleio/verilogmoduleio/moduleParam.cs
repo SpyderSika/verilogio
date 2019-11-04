@@ -69,7 +69,7 @@ namespace verilogmoduleio.moduleParamData
     /// </summary>
     public  enum signalTypeProperty
     {
-        reg,wire
+        reg,wire,logic
     }
 
     /// <summary>

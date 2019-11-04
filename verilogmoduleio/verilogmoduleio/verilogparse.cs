@@ -19,6 +19,7 @@ namespace verilogmoduleio
         public readonly string inoutPortword = "inout";
         public readonly string wireword = "wire";
         public readonly string regword = "reg";
+        public readonly string logicword = "logic";
         public readonly string moduleword = "module";
         public readonly string endmoduleword = "endmodule";
 
@@ -145,15 +146,20 @@ namespace verilogmoduleio
                     // extract reg/wire definition and remove word from line
                     var wirePoint = line.IndexOf(wireword);
                     var regPoint = line.IndexOf(regword);
+                    var logicPoint = line.IndexOf(logicword);
                     signalTypeProperty type = signalTypeProperty.wire;
 
                     if ( regPoint >= 0)
                     {
                         type = signalTypeProperty.reg;
                     }
+                    else if ( logicPoint >= 0)
+                    {
+                        type = signalTypeProperty.logic;
+                    }
                     var regwireRemovedline = line.Replace(wireword, "");
                     regwireRemovedline = regwireRemovedline.Replace(regword, "");
-
+                    regwireRemovedline = regwireRemovedline.Replace(logicword, "");
 
 
                     // extract signalname
