@@ -15,17 +15,19 @@ namespace verilogmoduleio
                 Console.WriteLine("option: -d  draw module IO diagram");
 
             }
-
-            var option = args[0].ToLower();
-
-            switch (option)
+            else
             {
-                case "-d":
-                    drawDiagram(args);
-                    break;
+
+                var option = args[0].ToLower();
+
+                switch (option)
+                {
+                    case "-d":
+                        drawDiagram(args);
+                        break;
+                }
+
             }
-
-
         }
 
         private static void drawDiagram(string[] args)
