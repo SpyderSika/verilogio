@@ -2,7 +2,7 @@
 
 ## summary
 generate text diagram comment from verilog module declaration.<p>
-
+at this version, support verilog 1995/2001 only. System Verilog will support in the future.
 if read verilog code,
 ```C
 module test(
