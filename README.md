@@ -4,15 +4,18 @@
 generate text diagram comment from verilog module declaration.<p>
 at this version, support verilog 1995/2001 only. System Verilog will support in the future.
 if read verilog code,
+  
+note: At this time Not tested and verilog 2001, Systemverilog code doesn't work well but will support soon.
+  
 ```C
 module test(
-input clk;
-input reset_b;
+input clk,
+input reset_b,
 
-input a;
-input [3:0] b; // bbb
+input a,
+input [3:0] b, // bbb
 
-output add;
+output add,
 );
 
 endmodule
