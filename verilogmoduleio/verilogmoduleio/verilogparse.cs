@@ -80,15 +80,16 @@ namespace verilogmoduleio
                 module.moduleName = modulename;
 
                 // input port extract
+/*
                 var input =  this.extractSignalDefinition(verilogcode, inputPortword);
                 var output = this.extractSignalDefinition(verilogcode, outputPortword);
                 var inout = this.extractSignalDefinition(verilogcode, inoutPortword);
-
+                */
                 try
                 {
-                    module.signalDic = input.Concat(output).ToDictionary(v => v.Key, v => v.Value).Concat(inout).ToDictionary(v=>v.Key,v=>v.Value);
-                    
+                    //                    module.signalDic = input.Concat(output).ToDictionary(v => v.Key, v => v.Value).Concat(inout).ToDictionary(v=>v.Key,v=>v.Value);
 
+                    module.signalDic = this.extractSignalDefinition(verilogcode, "");
 
                 }
                 catch (Exception ex)
@@ -134,6 +135,13 @@ namespace verilogmoduleio
 
             foreach(var line in lines)
             {
+                var crRemovedline = line.Replace("\r", " ").Replace("\n", " ");
+
+                var temp = extractSignal(crRemovedline);
+
+                foundsignals = foundsignals.Concat(temp).ToDictionary(v => v.Key, v => v.Value);
+
+                /*
                 var startPointofword = line.IndexOf(extractKeyword);
 
                 if (startPointofword >= 0 )
@@ -187,12 +195,79 @@ namespace verilogmoduleio
 
 
                 }
+                */
             }
 
 
             return foundsignals;
         }
 
+
+        public enum signalDefinitionState
+        {
+            init,io,width,name
+        }
+
+
+        private Dictionary<string, signalParam>extractSignal(string line)
+        {
+            Dictionary<string, signalParam> foundsignals = new Dictionary<string, signalParam>();
+
+            string[] splittedLine = line.Split(" ", StringSplitOptions.RemoveEmptyEntries);
+
+            signalParam currentParam = new signalParam();
+            signalDefinitionState currentstate = signalDefinitionState.init;
+
+            foreach ( var st in splittedLine)
+            {
+                if ( ( st == inputPortword || st == inoutPortword || st == outputPortword) )
+                {
+                    currentParam = new signalParam();
+                    currentParam.signalIO = judgeIOfromword(st);
+                    currentstate = signalDefinitionState.io;
+                }
+                else if ( st.StartsWith("[") && st.EndsWith("]") )
+                {
+                    currentParam.signalWidth = st;
+                    currentstate = signalDefinitionState.width;
+                }
+                else if (( currentstate == signalDefinitionState.width || currentstate == signalDefinitionState.io) && !signalTypeDefinitionWord(st) )
+                {
+                    currentstate = signalDefinitionState.name;
+
+                    var signalNamearray = st.Split(new string[] { ",", ";" ,")"}, StringSplitOptions.RemoveEmptyEntries);
+                    
+                    foreach(var name in signalNamearray)
+                    {
+                        var signal = new signalParam();
+                        signal.signalIO = currentParam.signalIO;
+                        signal.signalWidth = currentParam.signalWidth;
+                        signal.signalName = name;
+
+                        foundsignals.Add(name,signal);
+                    }
+
+                    currentstate = signalDefinitionState.init;
+                }
+
+
+            }
+
+
+            return foundsignals;
+        }
+
+
+        private bool signalTypeDefinitionWord(string word)
+        {
+            bool result = false;
+
+            if (word == wireword || word == regword || word == logicword)
+                result = true;
+
+            return result;
+
+        }
 
         private signalIOProperty judgeIOfromword(string keyword)
         {
