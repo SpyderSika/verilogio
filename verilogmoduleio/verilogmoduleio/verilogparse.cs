@@ -205,13 +205,16 @@ namespace verilogmoduleio
 
         public enum signalDefinitionState
         {
-            init,io,width,name
+            init,io,widthstart,widthend,name
         }
 
 
         private Dictionary<string, signalParam>extractSignal(string line)
         {
             Dictionary<string, signalParam> foundsignals = new Dictionary<string, signalParam>();
+
+            try
+            {
 
             string[] splittedLine = line.Split(" ", StringSplitOptions.RemoveEmptyEntries);
 
@@ -226,12 +229,18 @@ namespace verilogmoduleio
                     currentParam.signalIO = judgeIOfromword(st);
                     currentstate = signalDefinitionState.io;
                 }
-                else if ( st.StartsWith("[") && st.EndsWith("]") )
+                else if ( st.StartsWith("[") || st.EndsWith("]") )
                 {
-                    currentParam.signalWidth = st;
-                    currentstate = signalDefinitionState.width;
+                    currentParam.signalWidth += st;
+                    bool widthWrittenin1 = st.StartsWith("[") && st.EndsWith("]");
+                    bool widthEndDetect  = (currentstate == signalDefinitionState.widthstart ) && st.EndsWith("]");
+
+                    if ( widthWrittenin1 || widthEndDetect)
+                        currentstate = signalDefinitionState.widthend;
+                    else
+                        currentstate = signalDefinitionState.widthstart;
                 }
-                else if (( currentstate == signalDefinitionState.width || currentstate == signalDefinitionState.io) && !signalTypeDefinitionWord(st) )
+                else if (( currentstate == signalDefinitionState.widthend || currentstate == signalDefinitionState.io) && !signalTypeDefinitionWord(st) )
                 {
                     currentstate = signalDefinitionState.name;
 
@@ -244,7 +253,20 @@ namespace verilogmoduleio
                         signal.signalWidth = currentParam.signalWidth;
                         signal.signalName = name;
 
-                        foundsignals.Add(name,signal);
+                        #if DEBUG
+                        if ( name  == "[")
+                            Console.WriteLine("[ is found ");
+                        #endif
+
+
+                        if ( foundsignals.ContainsKey(name))
+                        {
+                            Console.WriteLine("Signal {0} is already defined",name);
+                        }
+                        else
+                        {
+                            foundsignals.Add(name,signal);
+                        }
                     }
 
                     currentstate = signalDefinitionState.init;
@@ -252,7 +274,13 @@ namespace verilogmoduleio
 
 
             }
-
+            }
+            catch ( Exception ex)
+            {
+                var msg = ex.ToString();
+                Console.WriteLine(msg);
+                throw ex;
+            }
 
             return foundsignals;
         }
