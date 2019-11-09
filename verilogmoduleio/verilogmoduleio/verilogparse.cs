@@ -36,20 +36,15 @@ namespace verilogmoduleio
         /// remove comment from verilog code.
         /// </summary>
         /// <param name="verilogcode">verilog code string</param>
-        /// <returns>comment removed comment</returns>
+        /// <returns>comment removed code</returns>
         public string commentRemove(string verilogcode)
         {
-            bool linecomment = false;
-            bool areacomment = false;
-            string removedcode = string.Empty;
-
-            var reg = new Regex(@"\/*[\s\S]*?\*/|//.*");
+            var removedcode = string.Empty;
+            var reg = new Regex(@"\/*[\s\S]*?\*/|//.*",RegexOptions.Compiled);
 
             removedcode = reg.Replace(verilogcode, " ");
 
             return removedcode;
-
-
         }
 
         /// <summary>
@@ -79,26 +74,14 @@ namespace verilogmoduleio
             {
                 module.moduleName = modulename;
 
-                // input port extract
-/*
-                var input =  this.extractSignalDefinition(verilogcode, inputPortword);
-                var output = this.extractSignalDefinition(verilogcode, outputPortword);
-                var inout = this.extractSignalDefinition(verilogcode, inoutPortword);
-                */
                 try
                 {
-                    //                    module.signalDic = input.Concat(output).ToDictionary(v => v.Key, v => v.Value).Concat(inout).ToDictionary(v=>v.Key,v=>v.Value);
-
                     module.signalDic = this.extractSignalDefinition(verilogcode, "");
-
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine("verilog code parsing error.");
                 }
-
-
-
             }
 
             return module;
@@ -111,10 +94,15 @@ namespace verilogmoduleio
         {
             var moduleStartPoint = verilogcode.IndexOf(moduleword);
             var endofmoduleDefinitionPoint = verilogcode.IndexOf('(');
+            var startofparameterDefinitionPoint = verilogcode.IndexOf("#(");
             string modulename = string.Empty;
+
+            endofmoduleDefinitionPoint = ( endofmoduleDefinitionPoint - startofparameterDefinitionPoint == 1 ) ? startofparameterDefinitionPoint : endofmoduleDefinitionPoint;
 
             if ( endofmoduleDefinitionPoint >= 0)
             {
+                
+
                 var startofmoduleDefinitionPoint = moduleStartPoint + moduleword.Length;
                 modulename = verilogcode.Substring(startofmoduleDefinitionPoint, endofmoduleDefinitionPoint - startofmoduleDefinitionPoint);
                 modulename = modulename.Trim();
@@ -141,64 +129,7 @@ namespace verilogmoduleio
 
                 foundsignals = foundsignals.Concat(temp).ToDictionary(v => v.Key, v => v.Value);
 
-                /*
-                var startPointofword = line.IndexOf(extractKeyword);
-
-                if (startPointofword >= 0 )
-                {
-
-                    // extract width
-                    var widthMatch = Regex.Match(line, @"\[[\s\S]*?\]");
-                    var width = widthMatch.Value;
-
-                    // extract reg/wire definition and remove word from line
-                    var wirePoint = line.IndexOf(wireword);
-                    var regPoint = line.IndexOf(regword);
-                    var logicPoint = line.IndexOf(logicword);
-                    signalTypeProperty type = signalTypeProperty.wire;
-
-                    if ( regPoint >= 0)
-                    {
-                        type = signalTypeProperty.reg;
-                    }
-                    else if ( logicPoint >= 0)
-                    {
-                        type = signalTypeProperty.logic;
-                    }
-                    var regwireRemovedline = line.Replace(wireword, "");
-                    regwireRemovedline = regwireRemovedline.Replace(regword, "");
-                    regwireRemovedline = regwireRemovedline.Replace(logicword, "");
-
-
-                    // extract signalname
-                    var shiftedline = regwireRemovedline.Substring(startPointofword);
-                    var temp = shiftedline.Trim().Replace(extractKeyword, "");
-
-                    temp = temp.Replace(";", "");
-                    if ( width != string.Empty && width != null)
-                        temp = temp.Replace(width, "");
-
-                    var namesinline = temp.Split(",");
-
-                    foreach( var name in namesinline)
-                    {
-                        signalParam currentParam = new signalParam();
-
-                        currentParam.signalName = name.Trim();
-                        currentParam.signalWidth = width;
-                        currentParam.signalProperty.Add(extractKeyword);
-                        currentParam.signalType = type;
-                        currentParam.signalIO = judgeIOfromword(extractKeyword);
-
-                        foundsignals.Add(name,currentParam);
-                    }
-
-
-                }
-                */
             }
-
-
             return foundsignals;
         }
 
@@ -253,12 +184,6 @@ namespace verilogmoduleio
                         signal.signalIO = currentParam.signalIO;
                         signal.signalWidth = currentParam.signalWidth;
                         signal.signalName = name;
-
-                        #if DEBUG
-                        if ( name  == "[")
-                            Console.WriteLine("[ is found ");
-                        #endif
-
 
                         if ( foundsignals.ContainsKey(name))
                         {
