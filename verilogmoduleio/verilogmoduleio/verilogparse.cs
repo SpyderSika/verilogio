@@ -63,7 +63,12 @@ namespace verilogmoduleio
 
         }
 
-
+        /// <summary>
+        /// extract module input/output/inout  ports data
+        /// before run this function, please split code by moduleSplit(string  verilogcode) function.
+        /// </summary>
+        /// <param name="verilogcode">verilog code. note:only 1 module is supported at this function. </param>
+        /// <returns>extracted parameter</returns>
         public moduleParam extractmodulePorts(string verilogcode)
         {
             moduleParam module = new moduleParam();
@@ -76,7 +81,7 @@ namespace verilogmoduleio
 
                 try
                 {
-                    module.signalDic = this.extractSignalDefinition(verilogcode, "");
+                    module.signalDic = this.extractSignalDefinition(verilogcode);
                 }
                 catch (Exception ex)
                 {
@@ -89,8 +94,12 @@ namespace verilogmoduleio
 
 
 
-        // this function should be private and be called by public investigate all module description.
-        public string  extractmoduleDefinition(string verilogcode)
+        /// <summary>
+        /// extract module name from verilog code
+        /// </summary>
+        /// <param name="verilogcode">verilog code</param>
+        /// <returns>module name</returns>
+        private string  extractmoduleDefinition(string verilogcode)
         {
             var moduleStartPoint = verilogcode.IndexOf(moduleword);
             var endofmoduleDefinitionPoint = verilogcode.IndexOf('(');
@@ -112,8 +121,12 @@ namespace verilogmoduleio
         }
 
 
-        // this function should be private and be called by public investigate all module description.
-        public Dictionary<string, signalParam> extractSignalDefinition(string  verilogcode, string extractKeyword)
+        /// <summary>
+        /// extract signals from code
+        /// </summary>
+        /// <param name="verilogcode">verilog  code</param>
+        /// <returns>signal Dictionary key is the name. value is signalParam. signalParam also includes signalname</returns>
+        private  Dictionary<string, signalParam> extractSignalDefinition(string  verilogcode)
         {
             Dictionary<string, signalParam> foundsignals = new Dictionary<string, signalParam>();
 
@@ -133,75 +146,81 @@ namespace verilogmoduleio
             return foundsignals;
         }
 
-
+        /// <summary>
+        /// signal extract state definition.
+        /// </summary>
         public enum signalDefinitionState
         {
             init,io,widthstart,widthend,name
         }
 
-
-        private Dictionary<string, signalParam>extractSignal(string line)
+        /// <summary>
+        /// body of signal extraction
+        /// </summary>
+        /// <param name="line">verilog line,splitted by ';' and '\r' and '\n' should be removed</param>
+        /// <returns>signal Dictionary key is the name. value is signalParam. signalParam also includes signalname</returns>
+        private Dictionary<string, signalParam> extractSignal(string line)
         {
             Dictionary<string, signalParam> foundsignals = new Dictionary<string, signalParam>();
 
             try
             {
 
-            string[] splittedLine = line.Split(" ", StringSplitOptions.RemoveEmptyEntries);
+                string[] splittedLine = line.Split(" ", StringSplitOptions.RemoveEmptyEntries);
 
-            signalParam currentParam = new signalParam();
-            signalDefinitionState currentstate = signalDefinitionState.init;
+                signalParam currentParam = new signalParam();
+                signalDefinitionState currentstate = signalDefinitionState.init;
 
-            foreach ( var st in splittedLine)
-            {
-                if ( ( st == inputPortword || st == inoutPortword || st == outputPortword) )
+                foreach (var st in splittedLine)
                 {
-                    currentParam = new signalParam();
-                    currentParam.signalIO = judgeIOfromword(st);
-                    currentstate = signalDefinitionState.io;
-
-                }
-                else if ( (st.StartsWith("[") || st.EndsWith("]")) && currentstate == signalDefinitionState.io  )
-                {
-                    currentParam.signalWidth += st;
-                    bool widthWrittenin1 = st.StartsWith("[") && st.EndsWith("]");
-                    bool widthEndDetect  = (currentstate == signalDefinitionState.widthstart ) && st.EndsWith("]");
-
-                    if ( widthWrittenin1 || widthEndDetect)
-                        currentstate = signalDefinitionState.widthend;
-                    else
-                        currentstate = signalDefinitionState.widthstart;
-                }
-                else if (( currentstate == signalDefinitionState.widthend || currentstate == signalDefinitionState.io) && !signalTypeDefinitionWord(st) )
-                {
-                    currentstate = signalDefinitionState.name;
-
-                    var signalNamearray = st.Split(new string[] { ",", ";" ,")"}, StringSplitOptions.RemoveEmptyEntries);
-                    
-                    foreach(var name in signalNamearray)
+                    if ((st == inputPortword || st == inoutPortword || st == outputPortword))
                     {
-                        var signal = new signalParam();
-                        signal.signalIO = currentParam.signalIO;
-                        signal.signalWidth = currentParam.signalWidth;
-                        signal.signalName = name;
+                        currentParam = new signalParam();
+                        currentParam.signalIO = judgeIOfromword(st);
+                        currentstate = signalDefinitionState.io;
 
-                        if ( foundsignals.ContainsKey(name))
-                        {
-                            Console.WriteLine("Signal {0} is already defined",name);
-                        }
+                    }
+                    else if ((st.StartsWith("[") || st.EndsWith("]")) && currentstate == signalDefinitionState.io)
+                    {
+                        currentParam.signalWidth += st;
+                        bool widthWrittenin1 = st.StartsWith("[") && st.EndsWith("]");
+                        bool widthEndDetect = (currentstate == signalDefinitionState.widthstart) && st.EndsWith("]");
+
+                        if (widthWrittenin1 || widthEndDetect)
+                            currentstate = signalDefinitionState.widthend;
                         else
+                            currentstate = signalDefinitionState.widthstart;
+                    }
+                    else if ((currentstate == signalDefinitionState.widthend || currentstate == signalDefinitionState.io) && !signalTypeDefinitionWord(st))
+                    {
+                        currentstate = signalDefinitionState.name;
+
+                        var signalNamearray = st.Split(new string[] { ",", ";", ")" }, StringSplitOptions.RemoveEmptyEntries);
+
+                        foreach (var name in signalNamearray)
                         {
-                            foundsignals.Add(name,signal);
+                            var signal = new signalParam();
+                            signal.signalIO = currentParam.signalIO;
+                            signal.signalWidth = currentParam.signalWidth;
+                            signal.signalName = name;
+
+                            if (foundsignals.ContainsKey(name))
+                            {
+                                Console.WriteLine("Signal {0} is already defined", name);
+                            }
+                            else
+                            {
+                                foundsignals.Add(name, signal);
+                            }
                         }
+
+                        currentstate = signalDefinitionState.init;
                     }
 
-                    currentstate = signalDefinitionState.init;
+
                 }
-
-
             }
-            }
-            catch ( Exception ex)
+            catch (Exception ex)
             {
                 var msg = ex.ToString();
                 Console.WriteLine(msg);
@@ -211,7 +230,11 @@ namespace verilogmoduleio
             return foundsignals;
         }
 
-
+        /// <summary>
+        /// return type of signal from word
+        /// </summary>
+        /// <param name="word"></param>
+        /// <returns>if true, the word is (wire or reg  or logic) else return false</returns>
         private bool signalTypeDefinitionWord(string word)
         {
             bool result = false;
@@ -223,6 +246,11 @@ namespace verilogmoduleio
 
         }
 
+        /// <summary>
+        /// judge input or output or inout
+        /// </summary>
+        /// <param name="keyword"></param>
+        /// <returns></returns>
         private signalIOProperty judgeIOfromword(string keyword)
         {
             signalIOProperty iotype = new signalIOProperty();
@@ -248,6 +276,11 @@ namespace verilogmoduleio
 
         }
 
+        /// <summary>
+        /// generate text diagram
+        /// </summary>
+        /// <param name="modP"></param>
+        /// <returns>generated diagram</returns>
         public string drawmoduleIO(moduleParam modP)
         {
             string result = string.Empty;
@@ -255,64 +288,64 @@ namespace verilogmoduleio
             string moduletop = "################";
             string modulebody = "#              #";
 
-            if ( modP.moduleName != string.Empty && modP.moduleName != null)
+            if (modP.moduleName != string.Empty && modP.moduleName != null)
             {
-            // module name
-            result += linecommentword + modP.moduleName + Environment.NewLine;
+                // module name
+                result += linecommentword + modP.moduleName + Environment.NewLine;
 
-            // max input port length
-            var maxlength = 0;
-            foreach( var sig in modP.signalDic)
-            {
-                var leftlength = sig.Value.signalName.Length + sig.Value.signalWidth.Length;
-                maxlength = (maxlength < leftlength) ? leftlength : maxlength;
-            }
-
-            // padding
-            var leftpadding = string.Empty;
-            for (int i = 0; i < maxlength + left2rightarrow.Length; i++)
-                leftpadding += " ";
-
-            result += linecommentword + leftpadding + moduletop + Environment.NewLine;
-
-            // loop twice is not smart.... 
-            foreach (var sig in modP.signalDic)
-            {
-                var temp = string.Empty;
-
-                if (sig.Value.signalIO == signalIOProperty.inputPort)
+                // max input port length
+                var maxlength = 0;
+                foreach (var sig in modP.signalDic)
                 {
-                    var leftport = sig.Value.signalName + sig.Value.signalWidth;
-                    int loop = maxlength - leftport.Length;
-
-                    // padding
-                    if (leftport.Length < maxlength)
-                        for (int i = 0; i < loop; i++)
-                            leftport += " ";
-
-                    var arrow = (sig.Value.signalWidth == string.Empty) ? left2rightarrow : busleft2rightarrow;
-
-                    result += linecommentword + leftport + arrow + modulebody + Environment.NewLine;
-
-                }
-                else
-                {
-                    var rightport = sig.Value.signalName + sig.Value.signalWidth;
-
-
-
-                    var arrow = (sig.Value.signalWidth == string.Empty) ? left2rightarrow : busleft2rightarrow;
-                    if (sig.Value.signalIO == signalIOProperty.inoutPort)
-                        arrow = (sig.Value.signalWidth == string.Empty) ? bothdirectionarrow : bothbusdirectionarrow;
-
-
-                    result += linecommentword + leftpadding + modulebody + arrow + rightport + Environment.NewLine;
-
+                    var leftlength = sig.Value.signalName.Length + sig.Value.signalWidth.Length;
+                    maxlength = (maxlength < leftlength) ? leftlength : maxlength;
                 }
 
-            }
+                // padding
+                var leftpadding = string.Empty;
+                for (int i = 0; i < maxlength + left2rightarrow.Length; i++)
+                    leftpadding += " ";
 
-            result += linecommentword + leftpadding + moduletop + Environment.NewLine;
+                result += linecommentword + leftpadding + moduletop + Environment.NewLine;
+
+                // loop twice is not smart.... 
+                foreach (var sig in modP.signalDic)
+                {
+                    var temp = string.Empty;
+
+                    if (sig.Value.signalIO == signalIOProperty.inputPort)
+                    {
+                        var leftport = sig.Value.signalName + sig.Value.signalWidth;
+                        int loop = maxlength - leftport.Length;
+
+                        // padding
+                        if (leftport.Length < maxlength)
+                            for (int i = 0; i < loop; i++)
+                                leftport += " ";
+
+                        var arrow = (sig.Value.signalWidth == string.Empty) ? left2rightarrow : busleft2rightarrow;
+
+                        result += linecommentword + leftport + arrow + modulebody + Environment.NewLine;
+
+                    }
+                    else
+                    {
+                        var rightport = sig.Value.signalName + sig.Value.signalWidth;
+
+
+
+                        var arrow = (sig.Value.signalWidth == string.Empty) ? left2rightarrow : busleft2rightarrow;
+                        if (sig.Value.signalIO == signalIOProperty.inoutPort)
+                            arrow = (sig.Value.signalWidth == string.Empty) ? bothdirectionarrow : bothbusdirectionarrow;
+
+
+                        result += linecommentword + leftpadding + modulebody + arrow + rightport + Environment.NewLine;
+
+                    }
+
+                }
+
+                result += linecommentword + leftpadding + moduletop + Environment.NewLine;
 
             }
 
