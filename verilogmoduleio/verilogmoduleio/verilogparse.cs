@@ -255,6 +255,8 @@ namespace verilogmoduleio
             string moduletop = "################";
             string modulebody = "#              #";
 
+            if ( modP.moduleName != string.Empty && modP.moduleName != null)
+            {
             // module name
             result += linecommentword + modP.moduleName + Environment.NewLine;
 
@@ -312,7 +314,7 @@ namespace verilogmoduleio
 
             result += linecommentword + leftpadding + moduletop + Environment.NewLine;
 
-
+            }
 
 
             return result;
