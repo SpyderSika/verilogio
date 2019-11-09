@@ -5,7 +5,7 @@ generate text diagram comment from verilog module declaration.<p>
 at this version, support verilog 1995/2001 only. System Verilog will support in the future.
 if read verilog code,
   
-note: At this time Not tested and verilog 2001, Systemverilog code doesn't work well but will support soon.
+note: At this time Not tested well.
   
 ```C
 module test(
@@ -62,7 +62,7 @@ if the signal is the bus, '=>' is used for arrow.
 ```
 
 ## License
-This library is provided under MIT License.
+MIT License or 3-Cause BSD License
 
 ## Author
 I don't open my real name, so SpyderSika is the name at github.
