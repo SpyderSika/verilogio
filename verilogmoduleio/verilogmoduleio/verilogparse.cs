@@ -228,8 +228,9 @@ namespace verilogmoduleio
                     currentParam = new signalParam();
                     currentParam.signalIO = judgeIOfromword(st);
                     currentstate = signalDefinitionState.io;
+
                 }
-                else if ( st.StartsWith("[") || st.EndsWith("]") )
+                else if ( (st.StartsWith("[") || st.EndsWith("]")) && currentstate == signalDefinitionState.io  )
                 {
                     currentParam.signalWidth += st;
                     bool widthWrittenin1 = st.StartsWith("[") && st.EndsWith("]");
