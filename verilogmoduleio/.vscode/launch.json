@@ -11,6 +11,7 @@
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/verilogmoduleio/bin/Debug/netcoreapp3.0/verilogmoduleio.dll",
+//            "args": ["-d","./bin/Debug/netcoreapp3.0/dummy.v"],
 //            "args": ["-d","./bin/Debug/netcoreapp3.0/ibex_core.sv"],
             "args": ["-d","./bin/Debug/netcoreapp3.0/cpu_top.v"],
             "cwd": "${workspaceFolder}/verilogmoduleio",

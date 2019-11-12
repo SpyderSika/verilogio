@@ -23,6 +23,13 @@ namespace verilogmoduleio
         public readonly string moduleword = "module";
         public readonly string endmoduleword = "endmodule";
 
+        public readonly string functionstartword = "function";
+        public readonly string functionendword  = "endfunction";
+        
+        public readonly string  taskstartword = "task";
+        public readonly string taskendword = "endtask";
+
+
         public readonly string left2rightarrow = "->";
         public readonly string busleft2rightarrow = "=>";
 
@@ -134,12 +141,14 @@ namespace verilogmoduleio
             // split line. verilog uses ';' to separate each line.
             var reg = new Regex(@";");
             var lines = reg.Split(verilogcode);
+                            
+            signalDefinitionState currentstate = signalDefinitionState.init;
 
             foreach(var line in lines)
             {
                 var crRemovedline = line.Replace("\r", " ").Replace("\n", " ");
 
-                var temp = extractSignal(crRemovedline);
+                var temp = extractSignal(crRemovedline,ref currentstate);
 
                 foundsignals = foundsignals.Concat(temp).ToDictionary(v => v.Key, v => v.Value);
 
@@ -152,15 +161,15 @@ namespace verilogmoduleio
         /// </summary>
         public enum signalDefinitionState
         {
-            init,io,widthstart,widthend,name
+            init,io,widthstart,widthend,name,taskstart,taskend,functionstart,functionend
         }
 
         /// <summary>
         /// body of signal extraction
         /// </summary>
-        /// <param name="line">verilog line,splitted by ';' and '\r' and '\n' should be removed</param>
+        /// <param name="line">verilog line,splitted by ';'.  '\r' and '\n' should be removed</param>
         /// <returns>signal Dictionary key is the name. value is signalParam. signalParam also includes signalname</returns>
-        private Dictionary<string, signalParam> extractSignal(string line)
+        private Dictionary<string, signalParam> extractSignal(string line, ref signalDefinitionState currentstate)
         {
             Dictionary<string, signalParam> foundsignals = new Dictionary<string, signalParam>();
 
@@ -170,11 +179,31 @@ namespace verilogmoduleio
                 string[] splittedLine = line.Split(" ", StringSplitOptions.RemoveEmptyEntries);
 
                 signalParam currentParam = new signalParam();
-                signalDefinitionState currentstate = signalDefinitionState.init;
+//                signalDefinitionState currentstate = signalDefinitionState.init;
 
                 foreach (var st in splittedLine)
                 {
-                    if ((st == inputPortword || st == inoutPortword || st == outputPortword))
+                    // function/task check
+                    if  ( st == functionstartword)
+                    {
+                        currentstate = signalDefinitionState.functionstart;
+                    }
+                    else if ( st == taskstartword )
+                    {
+                        currentstate = signalDefinitionState.taskstart;
+                    }
+                    else if ( st == functionendword && currentstate == signalDefinitionState.functionstart )
+                    {
+                        currentstate = signalDefinitionState.init;
+                    }
+                    else if ( st == taskendword && currentstate == signalDefinitionState.taskstart )
+                    {
+                        currentstate = signalDefinitionState.init;
+                    }
+
+
+                    else if ((st == inputPortword || st == inoutPortword || st == outputPortword) && 
+                                (currentstate != signalDefinitionState.functionstart && currentstate != signalDefinitionState.taskstart ))
                     {
                         currentParam = new signalParam();
                         currentParam.signalIO = judgeIOfromword(st);
@@ -217,7 +246,6 @@ namespace verilogmoduleio
 
                         currentstate = signalDefinitionState.init;
                     }
-
 
                 }
             }
