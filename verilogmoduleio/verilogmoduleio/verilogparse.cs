@@ -86,6 +86,7 @@ namespace verilogmoduleio
                 catch (Exception ex)
                 {
                     Console.WriteLine("verilog code parsing error.");
+                    Console.WriteLine(ex.ToString());
                 }
             }
 
