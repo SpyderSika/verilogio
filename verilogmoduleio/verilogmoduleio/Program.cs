@@ -22,6 +22,10 @@ namespace verilogmoduleio
 
                 switch (option)
                 {
+                    case "-c":
+                        removeComment(args);
+                        break;
+
                     case "-d":
                         drawDiagram(args);
                         break;
@@ -29,6 +33,20 @@ namespace verilogmoduleio
 
             }
         }
+
+        private static void removeComment(string[] args)
+        {
+            using (StreamReader fr = new StreamReader(args[1]))
+            {
+                var code = fr.ReadToEnd();
+
+                verilogparse vp = new verilogparse();
+                var commentRemoved = vp.commentRemove(code);
+            
+                Console.WriteLine(commentRemoved);
+            }
+        }
+
 
         private static void drawDiagram(string[] args)
         {
