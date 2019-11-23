@@ -13,7 +13,7 @@ namespace verilogmoduleio
             {
                 Console.WriteLine("verilogio option target.v");
                 Console.WriteLine("option: -d  draw module IO diagram");
-
+                Console.WriteLine("option  -c  clear all coment");
             }
             else
             {
@@ -28,6 +28,9 @@ namespace verilogmoduleio
 
                     case "-d":
                         drawDiagram(args);
+                        break;
+                    case "-p"
+                        drawPlantUML(args);
                         break;
                 }
 
@@ -70,5 +73,35 @@ namespace verilogmoduleio
                 }
             }
         }
+
+        private static void drawPlantUML(string[] args)
+        {
+            moduleParam mP = new moduleParam();
+
+            SortedDictionary<string,moduleParam> moduleParamDic = new SortedDictionary<string,moduleParam>();
+
+
+            // read verilog file list
+            using (StreamReader flist = new StreamReader(args[1]))
+            {
+                string file = String.Empty;
+
+                while( (file = flist.ReadLine()) != null)
+                {
+
+                // read file
+                // read verilog file
+                    using (StreamReader fr = new StreamReader(file))
+                    {
+                        var code = fr.ReadToEnd();
+
+                    }
+                }
+
+            }
+
+        }
+
+
     }
 }

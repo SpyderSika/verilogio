@@ -7,7 +7,7 @@ namespace verilogmoduleio.moduleParamData
     /// <summary>
     /// Data store class for module definition
     /// </summary>
-    class moduleParam
+    public class moduleParam
     {
         public string moduleName;
         public string instanceName;
