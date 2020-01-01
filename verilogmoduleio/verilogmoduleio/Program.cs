@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using verilogmoduleio.moduleParamData;
 
 namespace verilogmoduleio
 {
@@ -29,7 +31,7 @@ namespace verilogmoduleio
                     case "-d":
                         drawDiagram(args);
                         break;
-                    case "-p"
+                    case "-p":
                         drawPlantUML(args);
                         break;
                 }
